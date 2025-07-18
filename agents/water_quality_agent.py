@@ -5,9 +5,10 @@ import requests
 from datetime import datetime
 
 class WaterQualityAgent:
-    def __init__(self, data, api_url):
+    def __init__(self, data, api_url, pond_id=None):
         self.data = data
         self.api_url = api_url
+        self.pond_id = pond_id
 
     def row_to_payload(self, row):
         # Format date as 'YYYY-MM-DD HH:MM:SS'
@@ -18,7 +19,7 @@ class WaterQualityAgent:
             date_formatted = date_obj.strftime("%Y-%m-%d 00:00:00")
         except Exception:
             date_formatted = date_str  # fallback
-        return {
+        payload = {
             "date": date_formatted,
             "salinity": self._to_float(row[1]),
             "dissolved_oxygen": self._to_float(row[2]),
@@ -28,6 +29,9 @@ class WaterQualityAgent:
             "water_temp": self._to_float(row[6]),
             "air_temp": self._to_float(row[7]),
         }
+        if self.pond_id is not None:
+            payload["pond_id"] = self.pond_id
+        return payload
 
     def _to_float(self, value):
         try:

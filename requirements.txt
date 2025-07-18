@@ -1,3 +1,6 @@
 # requirements.txt
 csv 
 requests 
+mysql-connector-python
+fpdf 
+pandas 
