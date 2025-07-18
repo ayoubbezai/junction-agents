@@ -3,6 +3,7 @@
 from utils.data_loader import load_water_quality_data
 from agents.water_quality_agent import WaterQualityAgent
 from agents.mysql_gemmia_agent import MySQLGemmiaAgent
+from agents.gemini_task_agent import GeminiTaskAgent
 import google.generativeai as genai
 import pandas as pd
 
@@ -95,15 +96,33 @@ def run_mysql_gemmia_report():
     agent.generate_pdf_report(pdf_data)
 
 
+def run_gemini_task_agent():
+    agent = GeminiTaskAgent()
+    pond_id = input("Enter pond_id: ").strip()
+    print("Using sample data for Gemini Task Agent...")
+    user_input = '''"data": { "current_page": 1, "total_pages": 1, "total_items": 2, "per_page": 15, "items": [ { "id": 1, "location": "North Zone", "pond_name": "Pond Alpha", "size": "Large", "safe_range": { "ph": { "min": 7, "max": 12, "unit": "pH" }, "temperature": { "min": 20, "max": 30, "unit": "C" }, "oxygen": { "min": 5, "max": 10, "unit": "mg/L" } }, "region_id": 1, "created_at": "2025-07-18T01:49:09.000000Z", "updated_at": "2025-07-18T01:49:09.000000Z", "region": { "id": 1, "region_name": "batna", "created_at": "2025-07-18T01:49:06.000000Z", "updated_at": "2025-07-18T01:49:06.000000Z" } }, { "id": 2, "location": "North Zone", "pond_name": "Pond Alpha", "size": "Large", "safe_range": { "ph": { "min": 7, "max": 12, "unit": "pH" }, "temperature": { "min": 20, "max": 30, "unit": "C" }, "oxygen": { "min": 5, "max": 10, "unit": "mg/L" } }, "region_id": 1, "created_at": "2025-07-18T02:30:29.000000Z", "updated_at": "2025-07-18T02:30:29.000000Z", "region": { "id": 1, "region_name": "batna", "created_at": "2025-07-18T01:49:06.000000Z", "updated_at": "2025-07-18T01:49:06.000000Z" } } ] }\nFull texts\nid\ndate\nsalinity\ndissolved_oxygen\nph\nsecchi_depth\nwater_depth\nwater_temp\nair_temp\npond_id\ncreated_at\nupdated_at\n... (sensor data rows) ...\n🐟 Prediction Result:\nEnvironment Quality: Moderate\nBacteria Level: Low\n\n📌 Explanation:\n\n🔴 Dissolved oxygen is below optimal level (< 5 mg/L).\n⚠️ pH is outside the healthy range for fish (6.5–8.5).\n⚠️ Water transparency is low, which can affect light penetration.\n⚠️ Environment quality is moderate; it's not critical but requires monitoring.\n'''
+    print("\nGenerating tasks with Gemini AI...")
+    tasks = agent.generate_tasks(user_input)
+    print("\n--- Gemini AI Task List ---")
+    print(tasks)
+    print("--- End of Task List ---\n")
+    # Send tips to API
+    status, resp = agent.send_tips_to_api(pond_id, tasks)
+    print(f"Sent to API (status {status}): {resp}")
+
+
 def main():
     print("Select agent to run:")
     print("1. IoT Water Quality Simulator")
     print("2. MySQL & Gemmia PDF Report Generator")
-    choice = input("Enter 1 or 2: ").strip()
+    print("3. Gemini Task Generator (AI-powered TODOs)")
+    choice = input("Enter 1, 2, or 3: ").strip()
     if choice == "1":
         run_iot_simulation()
     elif choice == "2":
         run_mysql_gemmia_report()
+    elif choice == "3":
+        run_gemini_task_agent()
     else:
         print("Invalid choice.")
 
