@@ -4,8 +4,11 @@ from utils.data_loader import load_water_quality_data
 from agents.water_quality_agent import WaterQualityAgent
 from agents.mysql_gemmia_agent import MySQLGemmiaAgent
 from agents.gemini_task_agent import GeminiTaskAgent
+from agents.model_predictor import AquaIntelPredictor
 import google.generativeai as genai
 import pandas as pd
+import joblib
+import os
 
 API_URL = "http://127.0.0.1:8000/api/sensor_reading"  # Change as needed
 CSV_PATH = "data/waterquality.csv"
@@ -111,18 +114,49 @@ def run_gemini_task_agent():
     print(f"Sent to API (status {status}): {resp}")
 
 
+def run_model_prediction():
+    predictor = AquaIntelPredictor()
+    # Hardcoded example input for tomorrow's prediction
+    input_data = {
+        "Month": 7,
+        "DayOfYear": 199,        # July 17
+        "Week": 29,
+        "pH_lag1": 7.2,
+        "pH_lag2": 7.1,
+        "Turbidity_lag1": 2.8,
+        "Turbidity_lag2": 2.9,
+        "Conductivity_lag1": 300,
+        "Conductivity_lag2": 310,
+        "DissolvedOxygen_lag1": 8.5,
+        "DissolvedOxygen_lag2": 8.3,
+        "BOD_lag1": 2.1,
+        "BOD_lag2": 2.2,
+        "Nitrate_lag1": 0.5,
+        "Nitrate_lag2": 0.6,
+        "TotalColiform_lag1": 12,
+        "TotalColiform_lag2": 10
+    }
+    prediction = predictor.predict(input_data)
+    print("Prediction for tomorrow:")
+    for target, value in prediction.items():
+        print(f"{target}: {value:.2f}")
+
+
 def main():
     print("Select agent to run:")
     print("1. IoT Water Quality Simulator")
     print("2. MySQL & Gemmia PDF Report Generator")
     print("3. Gemini Task Generator (AI-powered TODOs)")
-    choice = input("Enter 1, 2, or 3: ").strip()
+    print("4. Run ML Prediction")
+    choice = input("Enter 1, 2, 3, or 4: ").strip()
     if choice == "1":
         run_iot_simulation()
     elif choice == "2":
         run_mysql_gemmia_report()
     elif choice == "3":
         run_gemini_task_agent()
+    elif choice == "4":
+        run_model_prediction()
     else:
         print("Invalid choice.")
 

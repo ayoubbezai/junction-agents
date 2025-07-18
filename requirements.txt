@@ -4,3 +4,7 @@ requests
 mysql-connector-python
 fpdf 
 pandas 
+numpy
+matplotlib
+scikit-learn
+joblib 
